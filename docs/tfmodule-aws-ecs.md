@@ -26,7 +26,7 @@ module "ecs_fargate" {
 ```
 
 - [ECS Fargate 클러스터 구성 참고](./snippet-ecs-fargate.md) 
-- [ECS EC2]() 클러스터 구성 참고
+- [ECS EC2 클러스터 구성 참고](./snippet-ecs-ec2.md)
 
 
 ## ECS Architecture

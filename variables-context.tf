@@ -11,11 +11,6 @@ variable "context" {
     cost_center  = number # Cost Center
     name_prefix  = string # resource name prefix
     pri_domain   = string # private domain name (ex, tools.customer.co.kr)
-    tags         = object({
-      Project     = string
-      Environment = string
-      Team        = string
-      Owner       = string
-    })
+    tags         = map(string)
   })
 }

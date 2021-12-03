@@ -1,5 +1,35 @@
 # ECS Fargate Cluster 구성 
 
+## ECS Fargate Cluster 구성 워크 플로우
+주요 구성 흐름은 아래와 같습니다.
+
+```
+1. context 정보 구성 - module "ctx" 
+
+2. VPC 구성 - module "vpc"
+   ECS 클러스터에 Public ALB 와 연결 되었다면, NAT 게이트웨이가 하나 이상 구성 되어야 합니다.  
+
+3. ECS Fargate 클러스터 구성 - module "ecs"
+ 
+4. Nginx 작업 정의 구성 - resource "aws_ecs_task_definition"
+   Nginx Docker 컨테이너를 실행하기 위한 스펙을 정의 합니다. (리소스, 포트 매핑, 컨테이너 이미지 등)
+   특히, Nginx 의 경우 CPU 는 512, Memory 는 1024 이상 필요로 합니다.
+
+5. Public ALB 를 위한 보안 그룹 구성 - "aws_security_group" "public_alb"
+   ALB 는 보안 그룹을 1개 이상 필수로 구성 되어야 하며, ALB 전용 보안 그룹을 신규로 만들 것을 권고 합니다.
+
+6. Public ALB 구성 
+   ALB 기본 정보. 연결될 서브네트워크, 서비스 리스너, 보안 그룹, TargetGroup 등 주요 리소스를 구성 합니다.
+
+7. ECS Service 구성
+   Nginx 작업 정의를 기반으로 nginx-test-servcie 를 구동 합니다.
+   주요 구성 정보로 서비스가 배치될 서브 네트워크, 포트 바인딩, 로드 밸런서 연결 등을 정의해야 합니다. 
+```
+
+
+## Sample
+본 예제는 기능 검증을 목적으로 최소로 구성 되었으므로 개발 및 운영 환경에 적용하지 마시기 바랍니다.
+
 ```
 module "ctx" {
   source = "git::https://github.com/bsp-dx/edu-terraform-aws.git?ref=tfmodule-context-v1.0.0"
@@ -7,13 +37,13 @@ module "ctx" {
   context = {
     aws_profile = "terran"
     region      = "ap-northeast-2"
-    project     = "appleswaf"
-    environment = "Production"
-    owner       = "owner@academyiac.ml"
+    project     = "waffle"
+    environment = "PoC"
+    owner       = "owner@academyiac.cf"
     team        = "DX"
-    cost_center = "20211129"
+    cost_center = "20211120"
     domain      = "academyiac.cf"
-    pri_domain  = "appleswaf.local"
+    pri_domain  = "mydemo.local"
   }
 }
 
@@ -25,19 +55,19 @@ module "vpc" {
   source = "git::https://github.com/bsp-dx/edu-terraform-aws.git?ref=tfmodule-aws-vpc-v1.0.0"
 
   context = module.ctx.context
-  cidr    = "171.2.0.0/16"
+  cidr    = "172.3.0.0/16"
 
   azs = [data.aws_availability_zones.this.zone_ids[0], data.aws_availability_zones.this.zone_ids[1]]
-
-  public_subnet_names  = ["pub-a1", "pub-b1"]
-  public_subnets       = ["171.2.11.0/24", "171.2.12.0/24"]
-  public_subnet_suffix = "pub"
 
   enable_nat_gateway = true
   single_nat_gateway = true
 
+  public_subnet_names  = ["pub-a1", "pub-b1"]
+  public_subnets       = ["172.3.11.0/24", "172.3.12.0/24"]
+  public_subnet_suffix = "pub"
+
   private_subnet_names = ["was-a1", "was-b1"]
-  private_subnets      = ["171.2.31.0/24", "171.2.32.0/24"]
+  private_subnets      = ["172.3.31.0/24", "172.3.32.0/24"]
 
   create_private_domain_hostzone = false
 
@@ -67,8 +97,8 @@ resource "aws_ecs_task_definition" "nginx" {
   requires_compatibilities = ["FARGATE", "EC2"]
   network_mode             = "awsvpc"
   execution_role_arn       = module.ecs.ecs_task_execution_role_arn
-  cpu                      = 256
-  memory                   = 512
+  cpu                      = 512
+  memory                   = 1024
   container_definitions    = <<EOF
 [
   {
@@ -76,8 +106,8 @@ resource "aws_ecs_task_definition" "nginx" {
     "image": "nginx:latest",
     "networkMode" : "awsvpc",
     "essential": true,
-    "cpu": 256,
-    "memory": 512,
+    "cpu": 512,
+    "memory": 1024,
     "portMappings": [
       {
         "hostPort": 80,
@@ -93,6 +123,29 @@ EOF
   depends_on = [module.ecs]
 }
 
+resource "aws_security_group" "public_alb" {
+  name        = "${module.ctx.name_prefix}-pub-alb-sg"
+  description = "Allow TLS inbound traffic"
+  vpc_id      = module.vpc.vpc_id
+
+  ingress {
+    description = "HTTP from VPC"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(module.ctx.tags, { Name = "${module.ctx.name_prefix}-pub-alb-sg" })
+}
+
 module "alb" {
   source = "git::https://github.com/bsp-dx/edu-terraform-aws.git?ref=tfmodule-aws-alb-v1.0.0"
 
@@ -102,7 +155,7 @@ module "alb" {
 
   vpc_id          = module.vpc.vpc_id
   subnets         = toset(module.vpc.public_subnets)
-  security_groups = [module.vpc.default_security_group_id]
+  security_groups = [aws_security_group.public_alb.id]
 
   target_groups = [
     {
@@ -136,6 +189,7 @@ data "aws_subnet_ids" "was" {
     name   = "tag:Name"
     values = [format("%s-was*", module.ctx.name_prefix)]
   }
+  depends_on = [module.vpc]
 }
 
 resource "aws_ecs_service" "nginx_service" {
@@ -143,7 +197,7 @@ resource "aws_ecs_service" "nginx_service" {
   cluster         = module.ecs.ecs_cluster_id
   task_definition = aws_ecs_task_definition.nginx.id
   desired_count   = 1
-  launch_type     = "FARGATE"
+  launch_type     = "EC2"
 
   load_balancer {
     container_name   = "nginx"
@@ -154,7 +208,7 @@ resource "aws_ecs_service" "nginx_service" {
   network_configuration {
     assign_public_ip = false
     subnets          = toset(data.aws_subnet_ids.was.ids)
-    security_groups  = [module.vpc.default_security_group_id]
+    security_groups  = [aws_security_group.public_alb.id]
   }
 
   tags = merge(module.ctx.tags, { Name = "nginx-test-service" })
