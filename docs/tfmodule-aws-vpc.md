@@ -26,17 +26,17 @@ module "vpc" {
   depends_on = [module.ctx]
 }
 
-
 data "aws_availability_zones" "this" {
   state = "available"
 }
 
 module "ctx" {
-  source = "../context"
+  source = "git::https://github.com/bsp-dx/edu-terraform-aws.git?ref=tfmodule-context-..."
+  context = { ...  
 }
 ```
 
-context 모듈은 [tfmodule-context](./tfmodule-context.md) 가이드를 참고 하세요.
+### context 모듈 구성은 [tfmodule-context](./tfmodule-context.md) 가이드를 참고 하세요.
 
 
 # VPC 구성
