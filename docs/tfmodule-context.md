@@ -23,6 +23,9 @@ module "ctx" {
 }
 ```
 
+
+# Input Variables
+
 | Name | Description | Type | Example | Required |
 |------|-------------|------|---------|:--------:|
 | context | 프로젝트 또는 프로덕트를 위한 컨텍스트 정보를 정의 합니다. 이를 통해 일관된 네이밍과 태그 속성을 지원 합니다. | object(string) | - | Yes |
