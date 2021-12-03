@@ -28,7 +28,7 @@ module "ctx" {
 
 | Name | Description | Type | Example | Required |
 |------|-------------|------|---------|:--------:|
-| context | 프로젝트 또는 프로덕트를 위한 컨텍스트 정보를 정의 합니다. 이를 통해 일관된 네이밍과 태그 속성을 지원 합니다. | object(string) | - | Yes |
+| context | 프로젝트에 관한 리소스를 생성 및 관리에 참조 되는 정보로 표준화된 네이밍 정책 및 리소스를 위한 속성 정보를 포함하며 이를 통해 데이터 소스 참조에도 활용됩니다. | object({}) | - | Yes |
 | name_prefix | 리소스 네이밍 규칙을 위한 접두어 입니다. 자동으로 구성 되니 정의하지 않는것을 권고 합니다. | string | - | No |
 | additional_tags | 태그 속성을 추가 하고자 하는 경우 정의 합니다. | map(string) | { MyKey1 = "Value1" } | No |
 
