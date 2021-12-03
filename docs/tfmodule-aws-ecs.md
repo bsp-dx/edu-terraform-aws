@@ -28,6 +28,13 @@ module "ecs_fargate" {
 - [ECS Fargate 클러스터 구성 참고](./snippet-ecs-fargate.md) 
 - [ECS EC2 클러스터 구성 참고](./snippet-ecs-ec2.md)
 
+### Dependencies Module
+- context 모듈은 [tfmodule-context](./tfmodule-context.md) 가이드를 참고 하세요.
+- VPC 모듈은 [tfmodule-aws-vpc](./tfmodule-aws-vpc.md) 가이드를 참고 하세요.
+- ALB 모듈은 [tfmodule-aws-alb](./tfmodule-aws-alb.md) 가이드를 참고 하세요.
+- ASG 모듈은 [tfmodule-aws-autoscaling](./tfmodule-aws-autoscaling.md) 가이드를 참고 하세요.
+- Launch Template 모듈은 [tfmodule-aws-launchtemplate](./tfmodule-aws-launchtemplate.md) 가이드를 참고 하세요.
+  
 
 ## ECS Architecture
 ECS 아키텍처를 구성하는 주요 컴포넌트 관계와 그 역할을 이해 합니다.

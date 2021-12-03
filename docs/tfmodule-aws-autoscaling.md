@@ -1,42 +1,48 @@
 # tfmodule-aws-autoscaling
 
-EC2 Autoscaling 그룹을 생성하는 테라폼 모듈 입니다.  
-Autoscaling 그룹을 생성 하려면 VPC 및 Subnet 과 LaunchTemplate 이 사전에 구성 되어 있어야 합니다.
+EC2 Auto-Scaling 그룹 을 생성하는 테라폼 모듈 입니다.
 
-## Usage
+## Example
 
 ```
-module "asg_my_web" {
-  source = "git::https://github.com/bsp-dx/edu-terraform-aws.git?ref=tfmodule-aws-autoscaling-v1.0.0"
-
-  context              = module.ctx.context
-  name                 = "my-web"
-  launch_template_name = "my-web-lt"
-  launch_template_version = "$Latest"
-  vpc_zone_identifier  = toset(module.vpc.public_subnets)
-  desired_capacity     = 1
-  min_size             = 1
-  max_size             = 10
-} 
-
-module "vpc" {
-  source = "git::https://github.com/bsp-dx/edu-terraform-aws.git?ref=tfmodule-aws-vpc-v1.0.0"
-  context  = module.ctx.context
-  # ... You need to define resources for vpc ...
-}
-
-module "ctx" {
-  source = "git::https://github.com/bsp-dx/edu-terraform-aws.git?ref=tfmodule-context-v1.0.0"
-  context = {  
-    # ... You need to define context variables ...
+data "aws_vpc" "this" {
+  filter {
+    name   = "tag:Name"
+    values = ["melonops*"]
   }
 }
+
+# ASG VPC Subnet ids 참조
+data "aws_subnets" "this" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.this.id]
+  }
+
+  filter {
+    name   = "tag:Name"
+    values = ["melonops-an2p-web*"]
+  }
+}
+
+# Launch Template 참조
+data "aws_launch_template" "my_web" {
+  name = "my_web"
+}
+
+module "my_asg" {
+  source = "../../"
+
+  context              = var.context
+  name                 = "my-web"
+  launch_template_name = data.aws_launch_template.my_web.name
+  launch_template_version = var.lt_version == null ? data.aws_launch_template.my_web.default_version : var.lt_version
+  vpc_zone_identifier  = toset(data.aws_subnets.this.ids)
+  desired_capacity     = 1
+  min_size             = 1
+  max_size             = 8
+} 
 ```
-
-### VPC 모듈 구성은 [tfmodule-aws-vpc](./tfmodule-aws-vpc.md) 가이드를 참고 하세요.
-### context 모듈 구성은 [tfmodule-context](./tfmodule-context.md) 가이드를 참고 하세요.
-
-
 
 ## Input Variables
 
@@ -73,11 +79,9 @@ module "ctx" {
 | warm_pool | Auto Scaling 그룹에 Warm Pool을 추가합니다. | any | <pre>{<br>  pool_state = "Stopped"<br>  min_size = 3<br>  max_group_prepared_capacity = 6<br>}</pre> | No |
 | create_schedule | Auto Scaling 그룹의 정기 작업(Cron Job) 설정 여부입니다. | bool | false | No |
 | schedules | Auto Scaling 그룹의 자동 조정 중 정기 작업(Cron Job)을 설정 합니다. | map(any) | {<br>  night = {<br>    min_size = 0<br>    max_size = 0<br>    desired_capacity = 0<br>    recurrence = "0 18 * * 1-5" # Mon-Fri in the evening<br>    time_zone = "Asia/Seoul"<br>  }<br>  morning = {<br>    min_size = 0<br>    max_size = 1<br>    desired_capacity = 1<br>    recurrence = "0 7 * * 1-5" # Mon-Fri in the morning<br>  }<br>  future = {<br>    min_size = 0<br>    max_size = 0<br>    desired_capacity = 0<br>    start_time = "2031-12-31T10:00:00Z" # Should be in the future<br>    end_time = "2032-01-01T16:00:00Z"<br>  }<br>} | No |
-| context | 프로젝트에 관한 리소스를 생성 및 관리에 참조 되는 정보로 표준화된 네이밍 정책 및 리소스를 위한 속성 정보를 포함하며 이를 통해 데이터 소스 참조에도 활용됩니다. | object({}) | - | Yes |
-
 
 ### Variables Reference
-- 
+
 - [service_linked_role](https://docs.aws.amazon.com/ko_kr/autoscaling/ec2/userguide/autoscaling-service-linked-role.html) Auto Scaling 서비스 연결 역할 참고
 - [initial_lifecycle_hooks](https://docs.aws.amazon.com/ko_kr/autoscaling/ec2/userguide/lifecycle-hooks.html) Auto Scaling Lifecycle Hook 참고
 - [warm_pool](https://docs.aws.amazon.com/ko_kr/autoscaling/ec2/userguide/ec2-auto-scaling-warm-pools.html) Auto Scaling Warm Pool 참고
