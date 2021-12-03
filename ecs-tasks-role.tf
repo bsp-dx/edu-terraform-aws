@@ -29,6 +29,6 @@ data "aws_iam_policy" "ecs_task_execution_policy" {
 resource "aws_iam_role_policy_attachment" "ecs_task_execution_role" {
   count = var.create_ecs ? 1 : 0
 
-  role       = concat(aws_iam_role.ecs_task_execution_role.*.arn, [""])[0]
+  role       = concat(aws_iam_role.ecs_task_execution_role.*.name, [""])[0]
   policy_arn = data.aws_iam_policy.ecs_task_execution_policy.arn
 }
