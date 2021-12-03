@@ -23,8 +23,31 @@ module "ctx" {
 }
 ```
 
+| Name | Description | Type | Example | Required |
+|------|-------------|------|---------|:--------:|
+| context | 프로젝트 또는 프로덕트를 위한 컨텍스트 정보를 정의 합니다. 이를 통해 일관된 네이밍과 태그 속성을 지원 합니다. | object(string) | - | Yes |
+| name_prefix | 리소스 네이밍 규칙을 위한 접두어 입니다. 자동으로 구성 되니 정의하지 않는것을 권고 합니다. | string | - | No |
+| additional_tags | 태그 속성을 추가 하고자 하는 경우 정의 합니다. | map(string) | { MyKey1 = "Value1" } | No |
 
 ## Output
+
+| Name | Description | 
+|------|-------------|
+| context | 프로젝트 또는 프로덕트를 위한 컨텍스트 정보 객체 입니다. |
+| name_prefix | 리소스 생성시 네이밍 규칙을 위한 접두어 값 입니다.|
+| tags | 리소스 생성시 적용 될 태그 값 입니다. |
+| region | AWS 리전입니다. |
+| region_alias | AWS 리전 별칭 입니다. |
+| project | 프로젝트 이름 입니다. |
+| environment | 환경(Production, Development, Stage, ..)을 대표하는 값 입니다. |
+| env_alias | 환경 값 별칭 입니다. |
+| owner | 프로젝트 또는 프로덕트의 Owner 입니다. |
+| team | 팀 이름 입니다.  |
+| cost_center | 비용 집계를 위한 Code Center 코드 입니다. |
+| domain | Public 도메인 입니다. |
+| pri_domain | Private 도메인 입니다. |
+
+## Output Sample
 
 Context 모듈로부터 참조 할 수 있는 Output 값 입니다.
 
