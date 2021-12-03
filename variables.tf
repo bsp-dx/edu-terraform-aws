@@ -2915,3 +2915,9 @@ variable "create_egress_only_igw" {
   type        = bool
   default     = true
 }
+
+variable "create_private_domain_hostzone" {
+  description = "Whether to create private hosted zone record or not. default is true."
+  type        = bool
+  default     = true
+}
