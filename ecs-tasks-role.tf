@@ -16,7 +16,7 @@ data "aws_iam_policy_document" "ecs_task_assume_role" {
 resource "aws_iam_role" "ecs_task_execution_role" {
   count = var.create_ecs ? 1 : 0
 
-  name               = "latency-task-execution-role"
+  name               = local.ecs_task_role_name
   assume_role_policy = data.aws_iam_policy_document.ecs_task_assume_role.json
 
   tags = merge(var.context.tags, { Name = local.ecs_task_role_name })
