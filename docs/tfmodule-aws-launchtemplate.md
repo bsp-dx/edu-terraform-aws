@@ -1,40 +1,40 @@
 # tfmodule-aws-lt
 EC2 Launch Template 을 생성하는 테라폼 모듈 입니다.
 
-## Example
+## Usage
 
 ```
 # AMI 참조 
-data "aws_ami" "my_web" {
-
+data "aws_ami" "node" {
   most_recent = true
-  owners      = ["099720109477"]
-
+  owners      = ["amazon"]
   filter {
     name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-bionic-18.04-amd64-*"]
+    values = ["amzn2-ami-ecs-hvm*"]
   }
-
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
 }
 
 # 커스텀 user_data
-data "template_file" "my_web" {
-  template = file("${path.module}/templates/my-web.tpl")
+data "template_file" "node" {
+  template = file("${path.module}/templates/ecs-node.tpl")
   vars     = {
     name = "Symplesims"
   }
 }
 
 # Launch Template
-module "my_web" {
+module "lt_node" {
   source = "../../"
 
   context          = var.context
-  image_id         = data.aws_ami.my_web.id
+  image_id         = data.aws_ami.node.id
   instance_type    = "t3.small"
-  name             = "my_web"
-  user_data_base64 = base64encode(data.template_file.my_web.rendered)
-
+  name             = "ecs-node"
+  user_data_base64 = base64encode(data.template_file.node.rendered)
 }
 ```
 
@@ -67,7 +67,8 @@ module "my_web" {
 | network_interfaces | EC2 인스턴스 구동시 커스텀 네트워크 인터페이스를 추가 합니다. | list(any) | <pre>network_interfaces = [{<br>  associate_public_ip_address = true<br>}]</pre> | No |
 | placement | EC2 인스턴스 배치를 위한 배치 그룹을 설정 합니다. | map(string) | <pre>placement = {<br>  group_name = "my_pgname"<br>}</pre> | No |
 | instance_tags | EC2 인스턴스에 적용 될 Tag를 설정 합니다. | map(string) | <pre>instance_tags = {<br>  Key1 = "Value1",<br>  Key2 = "Value2"<br>}</pre> | No |
-
+| context | 프로젝트에 관한 리소스를 생성 및 관리에 참조 되는 정보로 표준화된 네이밍 정책 및 리소스를 위한 속성 정보를 포함하며 이를 통해 데이터 소스 참조에도 활용됩니다. | object({}) | - | Yes |
+| _____________________________ | ______________________________________________________ | ___ | ___ | ___ |
 
 ### Variables Reference
 - [capacity_reservation_specification](https://docs.aws.amazon.com/ko_kr/AWSEC2/latest/UserGuide/capacity-reservations-using.html) EC2 인스턴스의 용량 예약 기본 설정 참고
