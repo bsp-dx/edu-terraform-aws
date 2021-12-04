@@ -60,13 +60,14 @@ module "lt_node" {
 | elastic_inference_accelerator | EC2 인스턴스에 연결할 Elastic Inference Accelerator 를 포함 합니다. | map(string) | <pre>elastic_inference_accelerator = {<br>  type = "eg1.2xlarge"<br>}</pre> | No |
 | enclave_options | EC2 인스턴스의 Nitro Enclave 옵션을 활성화 합니다. | bool | - | No |
 | hibernation_options | EC2 인스턴스의 hibernation 옵션을 활성화 합니다. | bool | - | No |
+| create_iam_instance_profile | EC2 인스턴스의 Instance Profile 을 자동으로 생성 할 것인지 여부 입니다. | bool | false | No |
 | iam_instance_profile_name | EC2 인스턴스의 Instance Profile Name 을 설정 합니다. | string | - | No |
 | iam_instance_profile_arn  | EC2 인스턴스의 Instance Profile ARN 정보를 설정 합니다. | string | - | No |
 | metadata_options | EC2 인스턴스의 메타데이터 및 사용자 데이터를 설정 합니다. | map(string) | <pre>metadata_options = {<br>  http_endpoint = "enabled"<br>  http_tokens   = "required"<br>  http_put_response_hop_limit = 1<br>}</pre> | No |
 | monitoring | EC2 인스턴스 모니터링 활성화 여부를 설정 합니다. | bool | true | No |
 | network_interfaces | EC2 인스턴스 구동시 커스텀 네트워크 인터페이스를 추가 합니다. | list(any) | <pre>network_interfaces = [{<br>  associate_public_ip_address = true<br>}]</pre> | No |
 | placement | EC2 인스턴스 배치를 위한 배치 그룹을 설정 합니다. | map(string) | <pre>placement = {<br>  group_name = "my_pgname"<br>}</pre> | No |
-| instance_tags | EC2 인스턴스에 적용 될 Tag를 설정 합니다. | map(string) | <pre>instance_tags = {<br>  Key1 = "Value1",<br>  Key2 = "Value2"<br>}</pre> | No |
+| instance_tags | EC2 인스턴스에 적용 될 tag 를 설정 합니다. | map(string) | <pre>instance_tags = {<br>  Key1 = "Value1",<br>  Key2 = "Value2"<br>}</pre> | No |
 | context | 프로젝트에 관한 리소스를 생성 및 관리에 참조 되는 정보로 표준화된 네이밍 정책 및 리소스를 위한 속성 정보를 포함하며 이를 통해 데이터 소스 참조에도 활용됩니다. | object({}) | - | Yes |
 | _____________________________ | ______________________________________________________ | ___ | ___ | ___ |
 
