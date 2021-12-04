@@ -19,7 +19,7 @@ data "aws_ami" "nginx" {
 
 # user_data
 data "template_file" "nginx" {
-  template = file("${path.module}/templates/nginx.ec2.tpl")
+  template = file("${path.module}/templates/userdata.nginx.tpl")
   vars     = {
     name = "Symplesims"
   }
