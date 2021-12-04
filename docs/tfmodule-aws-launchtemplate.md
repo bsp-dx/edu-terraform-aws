@@ -1,11 +1,10 @@
-# tfmodule-aws-lt
+# tfmodule-aws-launchtemplate
 EC2 Launch Template 을 생성하는 테라폼 모듈 입니다.
 
 ## Usage
 
 ```
-# AMI 참조 
-data "aws_ami" "node" {
+data "aws_ami" "nginx" {
   most_recent = true
   owners      = ["amazon"]
   filter {
@@ -18,23 +17,23 @@ data "aws_ami" "node" {
   }
 }
 
-# 커스텀 user_data
-data "template_file" "node" {
-  template = file("${path.module}/templates/ecs-node.tpl")
+# user_data
+data "template_file" "nginx" {
+  template = file("${path.module}/templates/nginx.ec2.tpl")
   vars     = {
     name = "Symplesims"
   }
 }
 
 # Launch Template
-module "lt_node" {
-  source = "../../"
+module "lt_nginx" {
+  source = "git::https://github.com/bsp-dx/edu-terraform-aws.git?ref=tfmodule-aws-launchtemplate-v1.0.0"
 
   context          = var.context
-  image_id         = data.aws_ami.node.id
+  image_id         = data.aws_ami.nginx.id
   instance_type    = "t3.small"
-  name             = "ecs-node"
-  user_data_base64 = base64encode(data.template_file.node.rendered)
+  name             = "nginx"
+  user_data_base64 = base64encode(data.template_file.nginx.rendered)
 }
 ```
 
