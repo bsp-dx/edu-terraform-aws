@@ -6,7 +6,7 @@ AWS VPC 서비스를 생성 하는 테라폼 모듈 입니다.
 
 ```
 module "vpc" {
-  source = "git::https://github.com/bsp-dx/eks-apps-handson//module/tfmodule-aws-vpc"
+  source = "git::https://github.com/bsp-dx/edu-terraform-aws.git?ref=tfmodule-aws-vpc-v1.0.0"
 
   context = module.ctx.context
   cidr    = "171.2.0.0/16"
@@ -67,7 +67,7 @@ VPC 내의 서비스 및 인스턴스(EC2)가 외부의 www 자원을 액세스 
     single_nat_gateway = false
 ```
 
-## VPC Flow 로그 
+## VPC Flow 로그
 VPC 흐름 로그를 사용하면 특정 네트워크 인터페이스(ENI), 서브넷 또는 전체 VPC에 대한 IP 트래픽을 캡처할 수 있습니다.
 
 ```
@@ -79,11 +79,11 @@ VPC 흐름 로그를 사용하면 특정 네트워크 인터페이스(ENI), 서�
     Name = "my-vpc-flow-logs-s3-bucket"
   }
 ```
-[vpc-flow-logs 샘플](https://github.com/terraform-aws-modules/terraform-aws-vpc/blob/master/examples/vpc-flow-logs/main.tf) 참고 
+[vpc-flow-logs 샘플](https://github.com/terraform-aws-modules/terraform-aws-vpc/blob/master/examples/vpc-flow-logs/main.tf) 참고
 
 ## VPC IP Pool 확장
 IP 주소 풀을 확장하기 위해 VP C와 연결할 보조 CIDR 블록을 정의 합니다.  
-애플리케이션 배치를 위한 대상 그룹의 타겟 유형이 IP 이거나, EKS 등의 컨테이너가 다수 올라오게 되면 IP 가 부족할 수 있는데 여기에 대응하기위해 IP 풀을 확장 합니다. 
+애플리케이션 배치를 위한 대상 그룹의 타겟 유형이 IP 이거나, EKS 등의 컨테이너가 다수 올라오게 되면 IP 가 부족할 수 있는데 여기에 대응하기위해 IP 풀을 확장 합니다.
 ```
     cidr                  = "172.0.0.0/16"
     secondary_cidr_blocks = ["172.1.0.0/16", "172.2.0.0/16"]
@@ -125,11 +125,11 @@ module "vpc" {
   ...
 }  
 ```
-[NACL 샘플](https://github.com/terraform-aws-modules/terraform-aws-vpc/blob/master/examples/network-acls/main.tf) 참고 
+[NACL 샘플](https://github.com/terraform-aws-modules/terraform-aws-vpc/blob/master/examples/network-acls/main.tf) 참고
 
 
 ## VPN Gateway 를 통한 외부 네트워크간 연결
-온-프레미스 또는 다른 CSP 벤더의 VPN 게이트웨이를 VPC 에 연결 할 수 있습니다. 
+온-프레미스 또는 다른 CSP 벤더의 VPN 게이트웨이를 VPC 에 연결 할 수 있습니다.
 ```
 resource "aws_vpn_gateway" "main" {
   vpc_id = "my-vpc"
@@ -231,8 +231,10 @@ resource "aws_vpn_connection_route" "azure" {
 | flow_log_cloudwatch_log_group_retention_in_days | VPC Flow Logs 용 Cloud CloudWatch 로그 그룹의 데이터 보관일 수 입니다. | number | 90 | No |
 | flow_log_cloudwatch_log_group_kms_key_id | VPC Flow Logs 용 Cloud CloudWatch 로그 그룹 적재에 사용할 KMS 암호화 키 입니다. | string | - | No |
 | flow_log_max_aggregation_interval | VPC Flow Logs 의 최대 수집 간격 입니다. | number | 600 | No |
-| _____________________________________ | ____________________________________________________ | _ | _ | _ |
- 
+| create_private_domain_hostzone | Route53 private host-zone 에 private domain 레코드를 생성할지 여부입니다.. | bool | false | No |
+| context | 프로젝트에 관한 리소스를 생성 및 관리에 참조 되는 정보로 표준화된 네이밍 정책 및 리소스를 위한 속성 정보를 포함하며 이를 통해 데이터 소스 참조에도 활용됩니다. | object({}) | - | Yes |
+| _________________________________ | ____________________________________________________ | _ | _ | _ |
+
 
 ## Outputs
 
