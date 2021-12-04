@@ -35,6 +35,23 @@ module "lt_nginx" {
   name             = "nginx"
   user_data_base64 = base64encode(data.template_file.nginx.rendered)
 }
+
+module "ctx" {
+  source = "git::https://github.com/bsp-dx/edu-terraform-aws.git?ref=tfmodule-context-v1.0.0"
+
+  context = {
+    aws_profile = "terran"
+    region      = "ap-northeast-2"
+    project     = "applegoods"
+    environment = "Production"
+    owner       = "owner@academyiac.ml"
+    team_name   = "Devops Transformation"
+    team        = "DX"
+    cost_center = "20211129"
+    domain      = "academyiac.ml"
+    pri_domain  = "applegoods.local"
+  }
+}
 ```
 
 ## Input Variables
