@@ -1,6 +1,5 @@
 locals {
-  ecs_task_role_name = var.middle_name == null ? "${var.context.project}EcsTaskExecutionRole"
-        : "${var.context.project}-${var.middle_name}-ecsTaskExecutionRole"
+  ecs_task_role_name = var.middle_name == null ? "${var.context.project}EcsTaskExecutionRole" : "${var.context.project}-${var.middle_name}-ecsTaskExecutionRole"
 }
 
 data "aws_iam_policy_document" "ecs_task_assume_role" {
