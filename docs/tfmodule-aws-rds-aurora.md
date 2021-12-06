@@ -3,9 +3,11 @@
 AWS [Aurora RDS](https://aws.amazon.com/ko/rds/aurora) 플랫폼 서비스를 생성 하는 테라폼 모듈 입니다.
 
 ## Usage
-Aurora RDS 마스터 DB 패스워드를 환경 변수로 설정 합니다.
+
+Aurora RDS 의 DB 패스워드가 오픈된 공간에 노출되는 것을 막기 위해 환경 변수로 설정 합니다.
+
 ```
-exprot TF_VAR_aurora_db_password="your_rds_password"
+exprot TF_VAR_aurora_db_password="root1234"
 ```
 
 ```
@@ -13,7 +15,7 @@ variable "aurora_db_password" {
   type = string
 }
 
-module "alb" {
+module "aurora" {
   source = "git::https://github.com/bsp-dx/edu-terraform-aws.git?ref=tfmodule-aws-rds-aurora-v1.0.0"
 
   context  = module.ctx.context
@@ -23,9 +25,10 @@ module "alb" {
   instance_type_replica               = "db.t3.medium"
   vpc_id                              = module.vpc.vpc_id
   db_subnet_group_name                = module.vpc.database_subnet_group_name
+  allowed_cidr_blocks                 = module.vpc.private_subnets_cidr_blocks
   create_security_group               = true
   publicly_accessible                 = false
-  allowed_cidr_blocks                 = toset(module.vpc.vpc_cidr_block)
+
   replica_count                       = 2
   iam_database_authentication_enabled = true
   username                            = "root"
