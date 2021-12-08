@@ -1,24 +1,19 @@
-output "launch_template_id" {
-  description = "The ID of the launch template"
-  value       = try(aws_launch_template.this[0].id, "")
+output "ecs_cluster_id" {
+  description = "ID of the ECS Cluster"
+  value       = concat(aws_ecs_cluster.this.*.id, [""])[0]
 }
 
-output "launch_template_name" {
-  description = "The name of the launch template"
-  value       = try(aws_launch_template.this[0].name, "")
+output "ecs_cluster_arn" {
+  description = "ARN of the ECS Cluster"
+  value       = concat(aws_ecs_cluster.this.*.arn, [""])[0]
 }
 
-output "launch_template_arn" {
-  description = "The ARN of the launch template"
-  value       = try(aws_launch_template.this[0].arn, "")
+output "ecs_cluster_name" {
+  description = "The name of the ECS cluster"
+  value       = local.cluster_name
 }
 
-output "launch_template_latest_version" {
-  description = "The latest version of the launch template"
-  value       = try(aws_launch_template.this[0].latest_version, "")
-}
-
-output "launch_template_default_version" {
-  description = "The default version of the launch template"
-  value       = try(aws_launch_template.this[0].default_version, "")
+output "ecs_task_execution_role_arn" {
+  description = "The ARN of ECS task execution role"
+  value       = concat(aws_iam_role.ecs_task_execution_role.*.arn, [""])[0]
 }
