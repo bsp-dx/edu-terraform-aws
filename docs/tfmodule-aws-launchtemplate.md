@@ -31,7 +31,7 @@ data "template_file" "tomcat" {
 module "lt_tomcat" {
   source = "git::https://github.com/bsp-dx/edu-terraform-aws.git?ref=tfmodule-aws-launchtemplate-v1.0.0"
 
-  context          = var.context
+  context          = module.ctx.context
   name             = "tomcat"
   image_id         = data.aws_ami.tomcat.id
   instance_type    = "t3.small"
@@ -98,3 +98,37 @@ module "ctx" {
 | launch_template_name | launch template 이름 입니다. | "my-web-lt" |
 | launch_template_arn | launch template ARN 입니다. | "arn:aws:ec2:ap-northeast-2:11111111:launch-template/lt-0fb6ea8dbbfbe80c9" |
 | launch_template_latest_version | launch template 최근 버전 입니다. | 1 |
+
+
+## Instance Profile submodule
+tfmodule-aws-launchtemplate 모듈에는 EC2 Instance Profile 정책을 자동 구성하는 Terraform 서브 모듈이 포함 되어 있습니다.
+
+### Usage
+```
+module "ec2_instance_profile" {
+  source                      = "./instance-profile"
+  create_iam_instance_profile = true
+  iam_instance_role_name      = "myEC2InstanceRole"
+  iam_instance_profile_name   = "myEC2InstanceProfile"
+  tags                        = { key1 = "value1" }
+}
+
+
+output "instance_role_id" {
+  value       = module.ec2_instance_profile.instance_role_id
+}
+
+output "instance_role_arn" {
+  value       = module.ec2_instance_profile.instance_role_arn
+}
+
+output "instance_profile_name" {
+  value       = module.ec2_instance_profile.instance_profile_name
+}
+
+output "instance_profile_arn" {
+  value       = module.ec2_instance_profile.instance_profile_arn
+}
+
+```
+
