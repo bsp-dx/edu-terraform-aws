@@ -33,9 +33,3 @@ variable "create_ecs_task_execution_role" {
   type        = bool
   default     = false
 }
-
-variable "create_ec2_instance_role" {
-  description = "Whether to create EC2 instance-role and instance profile."
-  type        = bool
-  default     = true
-}
