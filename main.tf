@@ -13,6 +13,8 @@ resource "aws_elasticache_subnet_group" "default" {
   count      = var.create_redis && length(var.subnet_ids) > 0 ? 1 : 0
   name       = local.subnet_group_name
   subnet_ids = var.subnet_ids
+
+  tags = merge(local.tags, { Name = local.subnet_group_name })
 }
 
 resource "aws_elasticache_parameter_group" "default" {
@@ -27,6 +29,8 @@ resource "aws_elasticache_parameter_group" "default" {
       value = parameter.value.value
     }
   }
+
+  tags = merge(local.tags, { Name = "${local.name}-params" })
 }
 
 resource "aws_elasticache_replication_group" "default" {
@@ -68,7 +72,6 @@ resource "aws_elasticache_replication_group" "default" {
   tags = merge(local.tags, { Name = local.name })
 
   depends_on = [aws_elasticache_subnet_group.default, aws_elasticache_parameter_group.default]
-
 }
 
 ##### aws_cloudwatch_metric_alarm
@@ -91,7 +94,10 @@ resource "aws_cloudwatch_metric_alarm" "cpu" {
 
   alarm_actions = var.alarm_actions
   ok_actions    = var.ok_actions
-  depends_on    = [aws_elasticache_replication_group.default]
+
+  tags = merge(local.tags, { Name = "${element(local.member_clusters, count.index)}-cpu-utilization" })
+
+  depends_on = [aws_elasticache_replication_group.default]
 }
 
 resource "aws_cloudwatch_metric_alarm" "memory" {
@@ -113,5 +119,8 @@ resource "aws_cloudwatch_metric_alarm" "memory" {
 
   alarm_actions = var.alarm_actions
   ok_actions    = var.ok_actions
-  depends_on    = [aws_elasticache_replication_group.default]
+
+  tags = merge(local.tags, { Name = "${element(local.member_clusters, count.index)}-freeable-memory" })
+
+  depends_on = [aws_elasticache_replication_group.default]
 }
