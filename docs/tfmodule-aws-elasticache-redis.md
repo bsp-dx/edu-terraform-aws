@@ -14,7 +14,7 @@ data "aws_availability_zones" "this" {
 }
 
 module "redis" {
-  source = "../"
+  source = "git::https://github.com/bsp-dx/edu-terraform-aws.git?ref=tfmodule-aws-elasticache-redis-v1.0.0"
 
   context                          = module.ctx.context
   vpc_id                           = module.vpc.vpc_id
